@@ -1,8 +1,14 @@
-var imgLess = angular.module('imgLess', [])
+/*jslint node: true */
+/*global angular */
+/*global navigator */
+/*global document */
 
-.factory('Browser', function() {
-    var ua = navigator.userAgent,
-        tem, M = ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
+'use strict';
+
+var imgLess = angular.module('imgLess', []);
+
+imgLess.factory('Browser', function () {
+    var ua = navigator.userAgent, tem, M = ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
     if (/trident/i.test(M[1])) {
         tem = /\brv[ :]+(\d+)/g.exec(ua) || [];
         return {
@@ -28,20 +34,18 @@ var imgLess = angular.module('imgLess', [])
         name: M[0],
         version: M[1]
     };
-})
-.factory('Conversion', function(Browser, $http) {
-    var canvas = document.createElement("canvas");
-    var browser = Browser;
+});
+imgLess.factory('Conversion', function (Browser) {
+    var canvas = document.createElement("canvas"), browser = Browser;
 
     return {
-        convert: function(img) {
+        convert: function (img) {
             canvas.width = img.naturalWidth;
             canvas.height = img.naturalHeight;
-            var ctx = canvas.getContext("2d");
+            var ctx = canvas.getContext("2d"), dataURL;
             ctx.drawImage(img, 0, 0);
 
-            var dataURL;
-            if (browser.name == "Chrome" || browser.name == "Opera") {
+            if (browser.name === "Chrome" || browser.name === "Opera") {
                 dataURL = canvas.toDataURL("image/webp");
             } else {
                 dataURL = canvas.toDataURL("image/png");
@@ -49,11 +53,11 @@ var imgLess = angular.module('imgLess', [])
 
             return dataURL;
         }
-    }
-})
-.factory('Handler', function($http) {
+    };
+});
+imgLess.factory('Handler', function ($http) {
     return {
-        save: function(path, uri) {
+        save: function (path, uri) {
             $http({
                 method: 'POST',
                 url: 'imgless.php',
@@ -66,7 +70,7 @@ var imgLess = angular.module('imgLess', [])
                 }
             });
         },
-        get: function(path) {
+        get: function (path) {
             return $http({
                 method: 'POST',
                 url: 'imgless.php',
@@ -78,9 +82,9 @@ var imgLess = angular.module('imgLess', [])
                 }
             });
         }
-    }
-})
-.directive('imgless', function(Handler, Conversion, $timeout) {
+    };
+});
+imgLess.directive('imgless', function (Handler, Conversion, $timeout) {
     return {
         restrict: 'E',
         replace: true,
@@ -90,25 +94,25 @@ var imgLess = angular.module('imgLess', [])
             class: '@',
             alt: '@'
         },
-        link: function(scope, elm, attrs) {
+        link: function (scope, elm) {
             var path = scope.src;
 
-            Handler.get(path).then(function(response, status) {
+            Handler.get(path).then(function (response) {
                 var uri = JSON.parse(response.data.response).uri;
 
-                if(uri !== 'false'){
+                if (uri !== 'false') {
                     elm[0].src = uri;
-                }
-                else{
-                  var image = new Image();
-                  image.src = path;
-                  uri = Conversion.convert(image);
+                } else {
+                    var image = new Image();
+                    image.src = path;
+                    uri = Conversion.convert(image);
 
-                    $timeout(function(){
-                      Handler.save(path, uri);
+                    $timeout(function () {
+                        Handler.save(path, uri);
                     }, 0);
                 }
             });
+
         },
         templateUrl: 'js/templates/image.html'
     };
