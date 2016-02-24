@@ -2,6 +2,7 @@
 /*global angular */
 /*global navigator */
 /*global document */
+/*global Image */
 
 'use strict';
 
@@ -26,7 +27,8 @@ imgLess.factory('Browser', function () {
         }
     }
     M = M[2] ? [M[1], M[2]] : [navigator.appName, navigator.appVersion, '-?'];
-    if ((tem = ua.match(/version\/(\d+)/i)) !== null) {
+    tem = ua.match(/version\/(\d+)/i);
+    if (tem !== null) {
         M.splice(1, 1, tem[1]);
     }
 
@@ -98,14 +100,14 @@ imgLess.directive('imgless', function (Handler, Conversion, $timeout) {
             var path = scope.src;
 
             Handler.get(path).then(function (response) {
-                var uri = JSON.parse(response.data.response).uri;
+                var uri = JSON.parse(response.data.response).uri, img;
 
                 if (uri !== 'false') {
                     elm[0].src = uri;
                 } else {
-                    var image = new Image();
-                    image.src = path;
-                    uri = Conversion.convert(image);
+                    img = new Image();
+                    img.src = path;
+                    uri = Conversion.convert(img);
 
                     $timeout(function () {
                         Handler.save(path, uri);
