@@ -12,7 +12,7 @@ if(isset($request->path) && isset($request->uri)){
   file_put_contents('images.json', json_encode($json));
 
   //delete the file, we no longer need it.
-  unlink($request->path);
+  //unlink($request->path);
 }
 
 //Get Data URI for saved image.
