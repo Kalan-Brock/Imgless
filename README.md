@@ -1,6 +1,6 @@
 # Imgless
 
-An Angular JS application to tie into your current app, which allows you to use <imgless> tags instead of <img> tags.
+An Angular JS application to tie into your current app, which allows you to use imgless tags instead of img tags.
 
 All <imgless> tags are converted to data URI and stored within the images.json file.  Images that are already stored, are served from the json file (almost) instantly.  This also allows you to serve images without actually needing the image on your server.
 
@@ -19,7 +19,7 @@ Attach the app where needed.
 <body ng-app="imgLess">
 ```
 
-Use <imgless> tags.
+Use imgless tags.
 
 ```
 <imgless src="img/toby.jpg" id="toby" class="toby"/>
