@@ -71,22 +71,10 @@ imgLess.factory('Handler', function ($http) {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 }
             });
-        },
-        get: function (path) {
-            return $http({
-                method: 'POST',
-                url: 'imgless.php',
-                data: {
-                    existingpath: path
-                },
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                }
-            });
         }
     };
 });
-imgLess.directive('imgless', function (Handler, Conversion, $timeout) {
+imgLess.directive('imgless', function (Handler, Conversion, $http, $timeout) {
     return {
         restrict: 'E',
         replace: true,
@@ -99,19 +87,24 @@ imgLess.directive('imgless', function (Handler, Conversion, $timeout) {
         link: function (scope, elm) {
             var path = scope.src;
 
-            Handler.get(path).then(function (response) {
-                var uri = JSON.parse(response.data.response).uri, img;
+            $http.get('images.json').then(function (response) {
+                var images = response.data, img, uri;
 
-                if (uri !== 'false') {
-                    elm[0].src = uri;
-                } else {
-                    img = new Image();
-                    img.src = path;
-                    uri = Conversion.convert(img);
+                if (images.images !== 'undefined') {
+                    if (images.hasOwnProperty(path)) {
+                        uri = images[path];
+                        elm[0].src = uri;
+                    } else {
+                        img = new Image();
+                        img.src = path;
+                        uri = Conversion.convert(img);
 
-                    $timeout(function () {
-                        Handler.save(path, uri);
-                    }, 0);
+                        $timeout(function () {
+                            Handler.save(path, uri);
+                        }, 0);
+
+                        elm[0].src = path;
+                    }
                 }
             });
 
