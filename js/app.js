@@ -42,10 +42,11 @@ imgLess.factory('Conversion', function (Browser) {
 
     return {
         convert: function (img) {
+            console.log(img.naturalWidth);
             canvas.width = img.naturalWidth;
             canvas.height = img.naturalHeight;
             var ctx = canvas.getContext("2d"), dataURL;
-            ctx.drawImage(img, 0, 0);
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
             if (browser.name === "Chrome" || browser.name === "Opera") {
                 dataURL = canvas.toDataURL("image/webp");
@@ -90,8 +91,8 @@ imgLess.directive('imgless', function (Handler, Conversion, $http, $timeout) {
             $http.get('images.json').then(function (response) {
                 var images = response.data, img, uri;
 
-                if (images.images !== 'undefined') {
-                    if (images.images[path] !== 'undefined') {
+                if (images.hasOwnProperty('images')) {
+                    if (images.images.hasOwnProperty([path])) {
                         uri = images.images[path];
                         elm[0].src = uri;
                     } else {
@@ -105,6 +106,16 @@ imgLess.directive('imgless', function (Handler, Conversion, $http, $timeout) {
 
                         elm[0].src = path;
                     }
+                } else {
+                    img = new Image();
+                    img.src = path;
+
+                    elm.bind('load', function () {
+                        uri = Conversion.convert(img);
+                        Handler.save(path, uri);
+                    });
+
+                    elm[0].src = path;
                 }
             });
 
