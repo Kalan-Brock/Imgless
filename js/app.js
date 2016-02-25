@@ -91,8 +91,8 @@ imgLess.directive('imgless', function (Handler, Conversion, $http, $timeout) {
                 var images = response.data, img, uri;
 
                 if (images.images !== 'undefined') {
-                    if (images.hasOwnProperty(path)) {
-                        uri = images[path];
+                    if (images.images[path] !== 'undefined') {
+                        uri = images.images[path];
                         elm[0].src = uri;
                     } else {
                         img = new Image();
