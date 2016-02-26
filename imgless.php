@@ -5,11 +5,14 @@ $postdata = file_get_contents("php://input");
 $request = json_decode($postdata);
 
 //Save new image if not there yet.
-if(isset($request->path) && isset($request->uri)){
+if(isset($request->path)){
 
-  $json['images'][$request->path] = $request->uri;
-  file_put_contents('images.json', json_encode($json));
+    $imageData = base64_encode(file_get_contents($request->path));
+    $uri = 'data: '.(function_exists('mime_content_type') ? mime_content_type($request->path) : $mime).';base64,'.base64_encode(file_get_contents($request->path));
 
-  //delete the file, we no longer need it.
-  //unlink($request->path);
+    $json[$request->path] = $uri;
+    file_put_contents('images.json', json_encode($json));
+
+    //delete the file, we no longer need it.
+    //unlink($request->path);
 }

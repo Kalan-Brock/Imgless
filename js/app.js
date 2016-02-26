@@ -8,65 +8,14 @@
 
 var imgLess = angular.module('imgLess', []);
 
-imgLess.factory('Browser', function () {
-    var ua = navigator.userAgent, tem, M = ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
-    if (/trident/i.test(M[1])) {
-        tem = /\brv[ :]+(\d+)/g.exec(ua) || [];
-        return {
-            name: 'IE',
-            version: (tem[1] || '')
-        };
-    }
-    if (M[1] === 'Chrome') {
-        tem = ua.match(/\bOPR\/(\d+)/);
-        if (tem !== null) {
-            return {
-                name: 'Opera',
-                version: tem[1]
-            };
-        }
-    }
-    M = M[2] ? [M[1], M[2]] : [navigator.appName, navigator.appVersion, '-?'];
-    tem = ua.match(/version\/(\d+)/i);
-    if (tem !== null) {
-        M.splice(1, 1, tem[1]);
-    }
-
-    return {
-        name: M[0],
-        version: M[1]
-    };
-});
-imgLess.factory('Conversion', function (Browser) {
-    var canvas = document.createElement("canvas"), browser = Browser;
-
-    return {
-        convert: function (img) {
-            console.log(img.naturalWidth);
-            canvas.width = img.naturalWidth;
-            canvas.height = img.naturalHeight;
-            var ctx = canvas.getContext("2d"), dataURL;
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-            if (browser.name === "Chrome" || browser.name === "Opera") {
-                dataURL = canvas.toDataURL("image/webp");
-            } else {
-                dataURL = canvas.toDataURL("image/png");
-            }
-
-            return dataURL;
-        }
-    };
-});
 imgLess.factory('Handler', function ($http) {
     return {
-        save: function (path, uri) {
+        save: function (path) {
             $http({
                 method: 'POST',
                 url: 'imgless.php',
                 data: {
-                    path: path,
-                    uri: uri
+                    path: path
                 },
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
@@ -75,7 +24,7 @@ imgLess.factory('Handler', function ($http) {
         }
     };
 });
-imgLess.directive('imgless', function (Handler, Conversion, $http, $timeout) {
+imgLess.directive('imgless', function (Handler, $http) {
     return {
         restrict: 'E',
         replace: true,
@@ -89,32 +38,13 @@ imgLess.directive('imgless', function (Handler, Conversion, $http, $timeout) {
             var path = scope.src;
 
             $http.get('images.json').then(function (response) {
-                var images = response.data, img, uri;
+                var images = response.data, uri;
 
-                if (images.hasOwnProperty('images')) {
-                    if (images.images.hasOwnProperty([path])) {
-                        uri = images.images[path];
-                        elm[0].src = uri;
-                    } else {
-                        img = new Image();
-                        img.src = path;
-                        uri = Conversion.convert(img);
-
-                        $timeout(function () {
-                            Handler.save(path, uri);
-                        }, 0);
-
-                        elm[0].src = path;
-                    }
+                if (images.hasOwnProperty([path])) {
+                    uri = images[path];
+                    elm[0].src = uri;
                 } else {
-                    img = new Image();
-                    img.src = path;
-
-                    elm.bind('load', function () {
-                        uri = Conversion.convert(img);
-                        Handler.save(path, uri);
-                    });
-
+                    Handler.save(path);
                     elm[0].src = path;
                 }
             });
