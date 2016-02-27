@@ -1,8 +1,5 @@
 /*jslint node: true */
 /*global angular */
-/*global navigator */
-/*global document */
-/*global Image */
 
 'use strict';
 
@@ -21,10 +18,13 @@ imgLess.factory('Handler', function ($http) {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 }
             });
+        },
+        get: function () {
+            return $http.get('images.json');
         }
     };
 });
-imgLess.directive('imgless', function (Handler, $http) {
+imgLess.directive('imgless', function (Handler) {
     return {
         restrict: 'E',
         replace: true,
@@ -37,7 +37,7 @@ imgLess.directive('imgless', function (Handler, $http) {
         link: function (scope, elm) {
             var path = scope.src;
 
-            $http.get('images.json').then(function (response) {
+            Handler.get().then(function (response) {
                 var images = response.data, uri;
 
                 if (images.hasOwnProperty([path])) {
