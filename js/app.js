@@ -5,7 +5,7 @@
 
 var imgLess = angular.module('imgLess', []);
 
-imgLess.factory('Handler', function ($http) {
+imgLess.factory('Handler', ['$http', function ($http) {
     return {
         save: function (path) {
             $http({
@@ -23,8 +23,8 @@ imgLess.factory('Handler', function ($http) {
             return $http.get('images.json');
         }
     };
-});
-imgLess.directive('imgless', function (Handler) {
+}]);
+imgLess.directive('imgless', ['Handler', function (Handler) {
     return {
         restrict: 'E',
         replace: true,
@@ -52,4 +52,4 @@ imgLess.directive('imgless', function (Handler) {
         },
         templateUrl: 'js/templates/image.html'
     };
-});
+}]);
